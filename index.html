@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f1e9">
+  <title>지피짱의 쉬는 시간</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ctext y='38' font-size='38'%3E☁%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","@pixiv/three-vrm":"./vendor/pixiv_three-vrm/lib/three-vrm.module.min.js"}}</script>
+</head>
+<body>
+  <canvas id="room" aria-label="지피짱의 방. 머리를 드래그하면 쓰다듬고, 빈 배경을 드래그하면 구도를 바꿉니다."></canvas>
+  <div class="ambience" aria-hidden="true"></div>
+  <header class="masthead ui">
+    <p class="eyebrow"><span class="tiny-flower">✳</span> A LITTLE PAUSE</p>
+    <h1>지피짱의<br><em>쉬는 시간</em></h1>
+    <p class="subtitle">아무것도 서두르지 않아도 돼.</p>
+  </header>
+  <nav class="utilities ui" aria-label="방 설정">
+    <button id="mood" class="round" aria-label="밤으로 바꾸기" title="낮과 밤"><span id="mood-icon">☀</span></button>
+    <button id="sound" class="round" aria-label="소리 켜기" aria-pressed="false" title="소리 켜기"><span>♫</span><i class="slash"></i></button>
+    <button id="memories" class="pill memory-button" aria-haspopup="dialog"><span>▧</span> 추억 <small id="memory-count">0/4</small></button>
+    <button id="photo" class="round" aria-label="사진 모드" title="사진 모드">⌑</button>
+  </nav>
+  <aside class="dialogue ui" id="dialogue" aria-live="polite" aria-atomic="true">
+    <span class="speaker">지피짱 <i></i></span>
+    <p id="line">왔구나!<br>오늘은 여기서 같이 쉬자.</p>
+  </aside>
+  <div id="pet-hint" class="pet-hint ui" aria-hidden="true">머리를 살살 쓰다듬어 줘 <span>↝</span></div>
+  <div id="fx" aria-hidden="true"></div>
+  <div id="mouth-target" aria-hidden="true"><span>여기!</span></div>
+  <div id="snack-ghost" aria-hidden="true">🍪</div>
+  <div class="bottom ui">
+    <p class="interaction-caption" id="caption">조금 가까워지는, 작은 순간들.</p>
+    <nav class="action-tray" aria-label="지피짱과 함께하기">
+      <button data-action="wave"><span class="action-icon wave-icon">✋</span><span>인사하기</span><kbd>1</kbd></button>
+      <button data-action="pet"><span class="action-icon">♡</span><span>쓰다듬기</span><kbd>2</kbd></button>
+      <button data-action="snack" id="snack" title="클릭해서 주거나 입 쪽으로 끌어 주세요"><span class="action-icon">🍪</span><span>간식 주기</span><kbd>3</kbd></button>
+      <span class="tray-divider"></span>
+      <button data-action="heart" aria-pressed="false"><span class="action-icon">♥</span><span>하트</span><kbd>4</kbd></button>
+      <button data-action="peace" aria-pressed="false"><span class="action-icon">✌</span><span>브이</span><kbd>5</kbd></button>
+    </nav>
+    <div class="view-row">
+      <div class="view-switch" role="group" aria-label="카메라 구도"><button id="close-view" aria-pressed="true">가까이</button><button id="full-view" aria-pressed="false">전신</button></div>
+      <span class="view-tip">빈 곳 드래그 · 휠로 확대</span>
+      <button id="reset" class="text-button" title="구도와 포즈 처음으로">↺ 처음 구도</button>
+    </div>
+  </div>
+  <div class="corner-note ui"><span class="live-dot"></span><span id="time-note">햇살이 머무는 오후</span></div>
+  <div id="toast" role="status"></div>
+  <div id="photo-ui" class="hidden">
+    <span class="photo-label">지피짱의 쉬는 시간 <small>PORTRAIT MODE</small></span>
+    <div class="photo-actions"><button id="capture" class="primary">⌑ 사진 저장</button><button id="photo-exit" class="pill">돌아가기 <kbd>Esc</kbd></button></div>
+    <div class="photo-corners" aria-hidden="true"></div>
+  </div>
+  <dialog id="album" aria-labelledby="album-title">
+    <div class="album-top"><div><p class="eyebrow">MOMENTS TO KEEP</p><h2 id="album-title">우리의 작은 추억</h2></div><button id="album-close" class="round" aria-label="추억 닫기">×</button></div>
+    <p class="album-intro">발견한 순간을 눌러 다시 만나 봐.</p>
+    <div id="cards" class="cards"></div>
+    <p class="album-foot">이 브라우저에 조용히 보관해 둘게.</p>
+  </dialog>
+  <div id="loading" class="loading-screen">
+    <div class="load-flower">✳</div><p class="eyebrow">A LITTLE PAUSE</p><h2>포근한 방을 준비해요.</h2><p id="load-text">지피짱이 곧 올 거예요.</p><div class="load-track"><i id="load-progress"></i></div><span id="load-percent">0%</span>
+  </div>
+  <div id="error" class="loading-screen hidden" role="alert"><div class="load-flower">☁</div><h2>방을 불러오지 못했어요.</h2><p id="error-text"></p><button id="retry" class="primary">다시 열기</button></div>
+  <a class="asset-credit ui" href="https://github.com/ph4segl3dak/gpchan-room#제작출처" target="_blank" rel="noopener">캐릭터 · GPChan</a>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
