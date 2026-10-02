@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+import {createAnimationLayer} from './animation.js?v=20261003-walkdance';
 
 const clamp = THREE.MathUtils.clamp;
 const smooth = value => { const x = clamp(value, 0, 1); return x * x * (3 - 2 * x); };
@@ -9,7 +10,8 @@ const envelope = (time, duration, attack = .42, release = .55) =>
 const DURATIONS = Object.freeze({ wave: 3.2, snack: 4.4, happy: 2.5, surprise: 1.9 });
 const BODY_NAMES = ['hips', 'spine', 'chest', 'upperChest', 'neck', 'head',
   'leftShoulder', 'rightShoulder', 'leftUpperArm', 'rightUpperArm',
-  'leftLowerArm', 'rightLowerArm', 'leftHand', 'rightHand'];
+  'leftLowerArm', 'rightLowerArm', 'leftHand', 'rightHand',
+  'leftUpperLeg','rightUpperLeg','leftLowerLeg','rightLowerLeg','leftFoot','rightFoot','leftToes','rightToes'];
 const FINGERS = ['Index', 'Middle', 'Ring', 'Little'];
 const SIDES = ['left', 'right'];
 
@@ -17,7 +19,7 @@ const SIDES = ['left', 'right'];
 export async function loadCharacter(onProgress = () => {}) {
   const loader = new GLTFLoader();
   loader.register(parser => new VRMLoaderPlugin(parser));
-  const gltf = await loader.loadAsync('./assets/gpchan_room_public_v026a_p2.vrm',
+  const gltf = await loader.loadAsync('./assets/jibbi_chan_bunny_vroid_v026a_stocking_neutral.vrm',
     event => onProgress(event.total ? event.loaded / event.total : .5));
   const vrm = gltf.userData.vrm;
   if (!vrm) throw new Error('지피짱의 VRM 데이터를 불러오지 못했어요.');
@@ -195,7 +197,10 @@ export async function loadCharacter(onProgress = () => {}) {
     reaction = null;
   }
 
+  const animation = await createAnimationLayer(vrm,bones);
+
   function update(dt, t, state = {}) {
+    animation.restore();
     dt = clamp(Number.isFinite(dt) ? dt : 0, 0, .05);
     clock += dt;
     if (transition) {
@@ -302,6 +307,8 @@ export async function loadCharacter(onProgress = () => {}) {
       expressions[name] = name === 'blink' ? value : THREE.MathUtils.damp(expressions[name], value, 9, dt);
       vrm.expressionManager?.setValue(name, expressions[name]);
     }
+    for(const name of ['leftUpperLeg','rightUpperLeg','leftLowerLeg','rightLowerLeg','leftFoot','rightFoot','leftToes','rightToes'])applyTarget(name,rate,dt*5);
+    animation.apply(dt,state.walkSpeed||0);
     // Eye aim is a world target; the small head turn supplies most of the gesture.
     // Updating the VRM once keeps lookAt and springs from fighting a second pose pass.
     gazeTarget.position.set(gazeX * .9, headReference.y + .10 + gazeY * .65, 3.2);
@@ -325,9 +332,11 @@ export async function loadCharacter(onProgress = () => {}) {
     };
   }
 
+  function getLandmarks(){const names=['leftFoot','rightFoot','leftToes','rightToes','leftHand','rightHand','leftIndexDistal','rightIndexDistal','leftMiddleDistal','rightMiddleDistal'];const points=names.map(name=>rawBone(name)?.getWorldPosition(new THREE.Vector3())).filter(Boolean);const top=headRaw.getWorldPosition(new THREE.Vector3());top.y+=.27;points.push(top);return points;}
+
   // Settle into the authored rest pose before the first visible frame.
   for (let frame = 0; frame < 60; frame++) update(1 / 60, 0, {});
   clock = 0; blinkStart = 2.7;
   onProgress(1);
-  return { root, vrm, height, update, react, cancelReaction, getAnchors };
+  return { root, vrm, height, update, react, cancelReaction, getAnchors,getLandmarks,animation };
 }

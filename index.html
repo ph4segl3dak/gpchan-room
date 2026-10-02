@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#f5f1e9">
   <title>지피짱의 쉬는 시간</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ctext y='38' font-size='38'%3E☁%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./style.css">
-  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","@pixiv/three-vrm":"./vendor/pixiv_three-vrm/lib/three-vrm.module.min.js"}}</script>
+  <link rel="stylesheet" href="./style.css?v=20261003-walkdance">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","@pixiv/three-vrm":"./vendor/pixiv_three-vrm/lib/three-vrm.module.min.js","@pixiv/three-vrm-animation":"./vendor/pixiv_three-vrm-animation/lib/three-vrm-animation.module.min.js"}}</script>
 </head>
 <body>
   <canvas id="room" aria-label="지피짱의 방. 머리를 드래그하면 쓰다듬고, 빈 배경을 드래그하면 구도를 바꿉니다."></canvas>
@@ -31,6 +31,15 @@
   <div id="fx" aria-hidden="true"></div>
   <div id="mouth-target" aria-hidden="true"><span>여기!</span></div>
   <div id="snack-ghost" aria-hidden="true">🍪</div>
+  <div id="move-control" class="move-control ui">
+    <div id="joystick" role="group" aria-label="이동 핸들. 끌어서 방 안을 걸어요. 키보드는 WASD 또는 방향키." tabindex="0"><span class="stick-cross" aria-hidden="true">✧</span><span id="stick-knob"></span></div>
+    <span class="move-label">걸어 보기 <kbd>WASD / 방향키</kbd></span>
+  </div>
+  <section class="dance-panel ui" aria-label="댄스">
+    <div class="dance-row"><label for="dance-select">춤추기</label><select id="dance-select"><option value="kpop_omg">OMG</option><option value="kpop_after_like">After LIKE</option><option value="kpop_hype_boy">Hype Boy</option></select><button id="dance-play" aria-label="선택한 춤 재생">▶</button><button id="dance-stop" aria-label="춤 멈추기" disabled>■</button></div>
+    <div class="dance-progress"><i id="dance-progress"></i></div><p id="dance-status" role="status">세 가지 안무 · 음악 없이</p>
+    <details class="dance-credit"><summary>안무 출처</summary><p>OMG / After LIKE: <a href="https://www.patreon.com/mmdlore/posts" target="_blank" rel="noopener">LORE</a> · Hype Boy: <a href="https://www.patreon.com/julimmd/posts/newjeans-hype-dl-76881411" target="_blank" rel="noopener">JULI</a><br>MMD 트레이스 → VRMA. 짧은 구간과 제자리 이동으로 변환. 음원 미포함. 원저작자 권리 유지. JULI는 재배포·재판매를 금지합니다.</p></details>
+  </section>
   <div class="bottom ui">
     <p class="interaction-caption" id="caption">조금 가까워지는, 작은 순간들.</p>
     <nav class="action-tray" aria-label="지피짱과 함께하기">
@@ -43,8 +52,8 @@
     </nav>
     <div class="view-row">
       <div class="view-switch" role="group" aria-label="카메라 구도"><button id="close-view" aria-pressed="true">가까이</button><button id="full-view" aria-pressed="false">전신</button></div>
-      <span class="view-tip">빈 곳 드래그 · 휠로 확대</span>
-      <button id="reset" class="text-button" title="구도와 포즈 처음으로">↺ 처음 구도</button>
+      <span class="view-tip">빈 곳 드래그 · 시점</span>
+      <button id="reset" class="text-button" title="위치와 구도 처음으로">↺ 제자리로</button>
     </div>
   </div>
   <div class="corner-note ui"><span class="live-dot"></span><span id="time-note">햇살이 머무는 오후</span></div>
@@ -65,6 +74,6 @@
   </div>
   <div id="error" class="loading-screen hidden" role="alert"><div class="load-flower">☁</div><h2>방을 불러오지 못했어요.</h2><p id="error-text"></p><button id="retry" class="primary">다시 열기</button></div>
   <a class="asset-credit ui" href="https://github.com/ph4segl3dak/gpchan-room#제작출처" target="_blank" rel="noopener">캐릭터 · GPChan</a>
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/main.js?v=20261003-walkdance"></script>
 </body>
 </html>
